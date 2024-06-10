@@ -909,8 +909,7 @@ class PowerTodoistCard extends LitElement {
 
         var icons = ((typeof this.config.icons !== 'undefined') && (this.config.icons.length == 4)) 
             ? this.config.icons 
-            : ["checkbox-marked-circle-outline", "circle-medium", "plus-outline", "trash-can-outline"]; 
-        
+            : ["checkbox-marked-circle-outline", "circle-medium", "plus-outline", "trash-can-outline"];
         let items = state.attributes.items || [];
 
         items = this.filterDates(items);
@@ -990,7 +989,11 @@ class PowerTodoistCard extends LitElement {
                                     @dblclick=${() => this.itemAction(item, "dbl_content")}
                             >
                                 <span class="powertodoist-item-content ${(this.itemsEmphasized[item.id]) ? css`powertodoist-special` : css``}" >
-                                ${item.content}</span></div>
+                                ${item.priority == 4 ? html`<span class="todoist-item-priority-${item.priority}"><ha-icon icon="mdi:flag-variant"></ha-icon></span>` 
+                                : item.priority == 3 ? html`<span class="todoist-item-priority-${item.priority}"><ha-icon icon="mdi:flag-variant"></ha-icon></span>`
+                                : item.priority == 2 ? html`<span class="todoist-item-priority-${item.priority}"><ha-icon icon="mdi:flag-variant"></ha-icon></span>`
+                                : null }
+                                ${item.content}${item.section}</span></div>
                                 ${item.description
                                     ? html`<div
                                         @click=${() => this.itemAction(item, "description")} 
@@ -1126,6 +1129,22 @@ class PowerTodoistCard extends LitElement {
                 display: flex;
                 flex-direction: row;
                 line-height: 40px;
+            }
+
+            .todoist-item-priority-4 {
+                color: red;
+            }
+
+            .todoist-item-priority-3 {
+                color: orange;
+            }
+            
+            .todoist-item-priority-2 {
+                color: blue;
+            }
+
+            .todoist-item-priority-1 {
+                color: white;
             }
 
             .powertodoist-item-completed {
