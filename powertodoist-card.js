@@ -400,8 +400,8 @@ class PowerTodoistCard extends LitElement {
 
                         var qa = value;
                         try {
-                            if (this.myConfig.filter_section && !qa.includes('/'))
-                                qa = qa + ' /' + this.myConfig.filter_section; //.replaceAll(' ','');
+                            if (this.myConfig.filter_v2_section && !qa.includes('/'))
+                                qa = qa + ' /' + this.myConfig.filter_v2_section; //.replaceAll(' ','');
                         } catch (error) { }
                         try {
                             if (state.attributes.project.name && !qa.includes('#'))
@@ -511,16 +511,16 @@ class PowerTodoistCard extends LitElement {
         });
   
         // Let's make things really easy to use further down:
-        let section_id2order = {}; // Object, not array - we store section_ids as strings
-        section_id2order[""] = 0; // not really a section in Todoist, but when incremented, will move to first section
-        let section_order2id = [];
+        let v2_section_id2order = {}; // Object, not array - we store section_ids as strings
+        v2_section_id2order[""] = 0; // not really a section in Todoist, but when incremented, will move to first section
+        let v2_section_order2id = [];
         state.sections.map(s => {
-            section_id2order[s.id.toString()] = s.section_order;
-            section_order2id[s.section_order] = s.id;
+            v2_section_id2order[s.v2_id.toString()] = s.v2_section_order;
+            v2_section_order2id[s.v2_section_order] = s.v2_id;
             //section_id2name[s.id.toString()] = s.name;
             //section_name2id[s.name] = s.id;
         });
-        let nextSection = section_order2id[section_id2order[item.section_id] + 1] || item.project_id;
+        let nextSection = v2_section_order2id[v2_section_id2order[item.v2_section_id] + 1] || item.project_id;
 
         let input = "";
         if (promptTexts || // we have an explicit request to prompt the user
@@ -590,7 +590,7 @@ class PowerTodoistCard extends LitElement {
                 },
             }) - 1;
             // Move to next section. To move to "no section" Todoist expects a move to the project...:
-            commands[newIndex].args[nextSection !== item.project_id ? "section_id" : "project_id"] = nextSection;
+            commands[newIndex].args[nextSection !== item.v2_project_id ? "v2_section_id" : "v2_project_id"] = nextSection;
         }
 
         let default_actions = {
@@ -915,17 +915,17 @@ class PowerTodoistCard extends LitElement {
         items = this.filterDates(items);
         
         // filter by section:
-        let section_name2id = [];
-        if (!this.myConfig.filter_section_id && this.myConfig.filter_section) {
+        let v2_section_name2id = [];
+        if (!this.myConfig.filter_v2_section_id && this.myConfig.filter_v2_section) {
             //let state = this.hass.states[this.config.entity].attributes;
             state.attributes.sections.map(s => {
-                section_name2id[s.name] = s.id;
+                v2_section_name2id[s.name] = s.v2_id;
             });            
         }
-        let section_id = this.myConfig.filter_section_id || section_name2id[this.myConfig.filter_section] || undefined;
-        if (section_id) {
+        let v2_section_id = this.myConfig.filter_v2_section_id || v2_section_name2id[this.myConfig.filter_v2_section] || undefined;
+        if (v2_section_id) {
             items = items.filter(item => {
-                return item.section_id === section_id;
+                return item.v2_section_id === v2_section_id;
             });
         }
 
@@ -952,8 +952,8 @@ class PowerTodoistCard extends LitElement {
         }
 
     // Starts with named section or default, tries to get section name from id, but lets friendly_name override it:
-    let cardName = this.config.filter_section || "ToDoist";
-    try { cardName = state.attributes.sections.find(s => { return s.id === section_id }).name } catch (error) { }       
+    let cardName = this.config.filter_v2_section || "ToDoist";
+    try { cardName = state.attributes.sections.find(s => { return s.v2_id === v2_section_id }).name } catch (error) { }       
     cardName = this.config.friendly_name || cardName;
 
 // https://lit.dev/docs/v1/lit-html/writing-templates/#repeating-templates-with-looping-statements
@@ -993,7 +993,7 @@ class PowerTodoistCard extends LitElement {
                                 : item.priority == 3 ? html`<span class="todoist-item-priority-${item.priority}"><ha-icon icon="mdi:flag-variant"></ha-icon></span>`
                                 : item.priority == 2 ? html`<span class="todoist-item-priority-${item.priority}"><ha-icon icon="mdi:flag-variant"></ha-icon></span>`
                                 : null }
-                                ${item.content}${item.section}</span></div>
+                                ${item.content}</span></div>
                                 ${item.description
                                     ? html`<div
                                         @click=${() => this.itemAction(item, "description")} 
